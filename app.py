@@ -38,9 +38,9 @@ schedule_data = {
     ],
     "12/23 (二) Day 2": [
         {"time": "Morning", "loc": "屏東出發", "addr": "屏東縣", "note": "移動日 (南迴)"},
-        {"time": "16:00", "loc": "花蓮市區中正國小", "addr": "花蓮縣花蓮市中正路210號", "note": "檢測點 1"},
-        {"time": "16:00", "loc": "花蓮市區中華國小", "addr": "花蓮縣花蓮市國盛二街22號", "note": "檢測點 2"},
-        {"time": "19:00", "loc": "花蓮市區住宿", "addr": "花蓮縣花蓮市林政街88巷29號", "note": "Check-in"},
+        {"time": "16:00", "loc": "花蓮市區 (中正路)", "addr": "花蓮縣花蓮市中正路210號", "note": "檢測點 1"},
+        {"time": "19:00", "loc": "花蓮市區 (國盛二街)", "addr": "花蓮縣花蓮市國盛二街22號", "note": "檢測點 2"},
+        {"time": "Night", "loc": "花蓮住宿 (林政街)", "addr": "花蓮縣花蓮市林政街88巷29號", "note": "休息住宿"},
     ],
     "12/24 (三) Day 3": [
         {"time": "Morning", "loc": "花蓮出發", "addr": "花蓮縣", "note": "前往宜蘭"},
@@ -62,7 +62,7 @@ schedule_data = {
     ],
     "12/27 (六) Day 6": [
         {"time": "Morning", "loc": "苗栗出發", "addr": "苗栗縣", "note": "前往台中"},
-        {"time": "11:00", "loc": "霧峰健體中心", "addr": "臺中市霧峰區成功路200號對面", "note": "檢測點"},
+        {"time": "11:00", "loc": "台中霧峰 (成功路)", "addr": "台中市霧峰區成功路200號", "note": "檢測點"},
         {"time": "13:00", "loc": "台中北區 (雙十路)", "addr": "臺中市北區雙十路一段16號", "note": "檢測點"},
     ],
     "12/28 (日) Day 7": [
@@ -79,20 +79,21 @@ schedule_data = {
 
 # --- 輔助函式 ---
 def get_google_maps_url(address):
+    # 使用 query 參數確保精準導航
     return f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(address)}"
 
 def get_full_route_url(events):
-    # 產生多點導航連結: https://www.google.com/maps/dir/起點/點1/點2...
+    # 產生多點導航連結
     base = "https://www.google.com/maps/dir/"
+    # 過濾掉 'loc' 包含 '出發' 的項目作為起點，這裡簡單將所有地址串接
     addrs = [urllib.parse.quote(e['addr']) for e in events]
     return base + "/".join(addrs)
 
 # --- 主程式邏輯 ---
 st.title("🏊 EO Swim 環島任務")
 
-# 自動判斷今天日期 (簡單版)
+# 自動選擇日期邏輯
 days_list = list(schedule_data.keys())
-# 可以加入自動選擇當日的邏輯，這裡先預設選單
 selected_day = st.selectbox("請選擇日期：", days_list)
 
 events = schedule_data[selected_day]
@@ -113,9 +114,7 @@ st.markdown("---")
 
 # [功能] 顯示單點卡片
 for event in events:
-    # 使用 Container 包裝卡片
     with st.container():
-        # 自定義 HTML 渲染卡片外觀
         st.markdown(f"""
         <div class="event-card">
             <div>
@@ -127,10 +126,8 @@ for event in events:
         </div>
         """, unsafe_allow_html=True)
         
-        # 單點導航按鈕
         col1, col2 = st.columns([1, 1])
         with col1:
             st.link_button("📍 單點導航", get_google_maps_url(event['addr']))
         with col2:
-            # 這裡預留電話按鈕，若有電話資料可動態生成
-            st.button("📞 聯絡場館", disabled=True, key=f"call_{event['time']}")
+            st.button("📞 聯絡場館", disabled=True, key=f"call_{event['loc']}")
