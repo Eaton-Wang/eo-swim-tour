@@ -5,97 +5,119 @@ from datetime import datetime
 # --- 1. 頁面基礎設定 ---
 st.set_page_config(page_title="EO Swim Tour", page_icon="🏊", layout="centered")
 
-# --- 2. 介面優化 CSS (修正輸入框白屏問題) ---
+# --- 2. 強制高對比 CSS (無視手機深色模式) ---
 st.markdown("""
     <style>
-    /* 頂部 Hero 標題區塊 */
+    /* 1. 強制全域背景為淺灰色，文字為純黑色 */
+    .stApp {
+        background-color: #f0f2f6 !important;
+    }
+    h1, h2, h3, h4, h5, h6, p, div, span, label {
+        color: #000000 !important;
+    }
+
+    /* 2. 針對下拉選單 (Selectbox) 的強力修正 */
+    /* 選單的外框：強制白底、黑字、深藍邊框 */
+    div[data-baseweb="select"] > div {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border: 2px solid #0066cc !important;
+        border-radius: 8px !important;
+    }
+    /* 選單內的文字 */
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] span {
+        color: #000000 !important;
+    }
+    /* 下拉選單的標題 (Label) */
+    div[data-testid="stSelectbox"] label {
+        font-size: 1.1rem !important;
+        font-weight: 800 !important;
+        color: #1f1f1f !important;
+        margin-bottom: 5px !important;
+    }
+    /* 下拉後的選項選單 (Popover) */
+    div[data-baseweb="popover"] {
+        background-color: #ffffff !important;
+    }
+    div[data-baseweb="menu"] li {
+        color: #000000 !important;
+        background-color: #ffffff !important;
+    }
+
+    /* 3. Hero 標題區塊 */
     .hero-container {
-        background: #0066cc;
-        padding: 15px 20px;
+        background-color: #004d99 !important; /* 深藍色背景 */
+        padding: 20px;
         border-radius: 10px;
-        color: white;
         margin-bottom: 20px;
         text-align: center;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border: 1px solid #003366;
     }
     .hero-title {
-        font-size: 1.4rem;
-        font-weight: 800;
+        color: #ffffff !important; /* 這裡強制白色，因為背景是深藍 */
+        font-size: 1.5rem;
+        font-weight: 900;
         margin: 0;
     }
     .hero-subtitle {
+        color: #e0e0e0 !important; /* 這裡強制淺灰 */
         font-size: 0.9rem;
-        opacity: 0.9;
         margin-top: 5px;
     }
 
-    /* 修正下拉選單 (Selectbox) 的顯示問題 */
-    /* 強制給予選單區域一個淺灰背景與邊框，避免「全白」 */
-    div[data-testid="stSelectbox"] > div > div {
-        background-color: #f0f2f6;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        color: #333;
-    }
-    /* 確保選單內的文字顏色夠深 */
-    div[data-testid="stSelectbox"] label {
-        font-weight: bold;
-        color: #1f2937;
-        font-size: 1rem;
-    }
-
-    /* 行程卡片設計 */
+    /* 4. 行程卡片設計 (高對比) */
     .event-card {
-        background-color: white;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-        margin-bottom: 12px;
-        border: 1px solid #e5e7eb; /* 增加邊框以利辨識 */
+        background-color: #ffffff !important;
+        padding: 16px;
+        border-radius: 12px;
+        /* 很深的陰影，讓卡片浮起來 */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
+        margin-bottom: 15px;
+        border: 2px solid #d1d1d1; /* 明顯的灰色邊框 */
     }
 
-    /* 時間與標籤 */
-    .time-row {
-        display: flex;
-        align-items: center;
-        margin-bottom: 5px;
-    }
+    /* 時間文字 */
     .time-text {
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: #111827; /* 深黑色 */
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: #000000 !important;
         margin-right: 10px;
     }
+    
+    /* 標籤 (Tag) */
     .tag {
-        font-size: 0.75rem;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-weight: 600;
-        background-color: #e5e7eb;
-        color: #374151;
+        font-size: 0.85rem;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 700;
+        background-color: #e0e0e0 !important;
+        color: #000000 !important;
+        border: 1px solid #999;
     }
     
-    /* 地點文字 */
+    /* 地點與地址 */
     .loc-text {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #0056b3; /* 連結藍 */
-        margin-bottom: 2px;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #004085 !important; /* 深藍色文字 */
+        margin-top: 8px;
     }
     .addr-text {
-        font-size: 0.9rem;
-        color: #4b5563;
-        margin-bottom: 12px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #333333 !important; /* 深灰色 */
+        margin-bottom: 15px;
     }
 
-    /* 按鈕優化 */
-    /* 主要連結按鈕 (導航) */
-    .stLinkButton a {
-        font-weight: bold !important;
+    /* 5. 按鈕優化 */
+    /* 導航按鈕：深藍底白字 */
+    div[data-testid="column"] a {
+        border: 1px solid #000 !important;
     }
     
     /* 隱藏 Footer */
-    footer {visibility: hidden;}
+    footer {display: none !important;}
+    header {display: none !important;}
     </style>
 """, unsafe_allow_html=True)
 
@@ -170,9 +192,9 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# [任務工具箱] (摺疊選單)
-with st.expander("🛠️ 任務工具箱 (Checklist & Data)"):
-    st.caption("📍 離場前確認：")
+# [任務工具箱]
+with st.expander("🛠️ 任務工具箱"):
+    st.markdown("**離場前確認：**")
     c1, c2 = st.columns(2)
     with c1:
         st.checkbox("eo 感測器 & iPad")
@@ -182,11 +204,11 @@ with st.expander("🛠️ 任務工具箱 (Checklist & Data)"):
         st.checkbox("延長線 / 電源")
     
     st.markdown("---")
-    # 數據表單連結
     data_link = "https://docs.google.com/forms/" 
+    # 使用 container_width 讓按鈕填滿，但保持預設樣式
     st.link_button("📝 開啟數據紀錄表 (Google Form)", data_link, use_container_width=True)
 
-# [日期選擇器 - 強制樣式修正]
+# [日期選擇器]
 st.write("") 
 days_list = list(schedule_data.keys())
 today_str = datetime.now().strftime("%m/%d")
@@ -196,7 +218,6 @@ for idx, day in enumerate(days_list):
         default_idx = idx
         break
 
-# 這裡的 Selectbox 會受到上方 CSS 保護，不會再變成全白
 selected_day = st.selectbox("📅 請選擇日期：", days_list, index=default_idx)
 events = schedule_data[selected_day]
 
@@ -221,10 +242,10 @@ for event in events:
     elif event.get('type') == "travel": icon = "🚗"
     elif event.get('type') == "sleep": icon = "🛌"
 
-    # 渲染卡片 (最純粹的 HTML 結構，避免 CSS 衝突)
+    # 渲染卡片 (HTML)
     st.markdown(f"""
     <div class="event-card">
-        <div class="time-row">
+        <div style="display: flex; align-items: center; margin-bottom: 5px;">
             <span class="time-text">{event['time']}</span>
             <span class="tag">{icon} {event['note']}</span>
         </div>
@@ -233,17 +254,17 @@ for event in events:
     </div>
     """, unsafe_allow_html=True)
     
-    # 按鈕區 (使用 Streamlit 原生 Columns 確保可點擊性)
+    # 按鈕區
     col_main, col_sub1, col_sub2, col_sub3 = st.columns([3, 1, 1, 1])
     
     with col_main:
         st.link_button("📍 導航前往", get_google_maps_url(event['addr']), use_container_width=True)
     
     with col_sub1:
-        st.link_button("🅿️", get_nearby_url(event['addr'], "parking"), help="找停車場", use_container_width=True)
+        st.link_button("🅿️", get_nearby_url(event['addr'], "parking"), help="找停車", use_container_width=True)
     with col_sub2:
         st.link_button("🍱", get_nearby_url(event['addr'], "food"), help="找美食", use_container_width=True)
     with col_sub3:
         st.link_button("☕", get_nearby_url(event['addr'], "coffee"), help="找咖啡", use_container_width=True)
 
-st.markdown("<br><br><div style='text-align: center; color: #999; font-size: 0.8rem;'>EO Swim Better</div>", unsafe_allow_html=True)
+st.markdown("<br><br>", unsafe_allow_html=True)
