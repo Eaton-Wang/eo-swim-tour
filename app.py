@@ -5,132 +5,101 @@ from datetime import datetime
 # --- 1. 頁面基礎設定 ---
 st.set_page_config(page_title="EO Swim Tour", page_icon="🏊", layout="centered")
 
-# --- 2. 絕對色彩 CSS (無視系統深色模式) ---
+# --- 2. 暴力高對比 CSS (針對按鈕與選單修正) ---
 st.markdown("""
     <style>
     /* =========================================
-       核心強制設定 (Root Variables)
-       這會強制 Streamlit 核心元件使用亮色系
+       1. 全域強制設定
        ========================================= */
     :root {
-        --primary-color: #0066cc;
-        --background-color: #ffffff;
-        --secondary-background-color: #f0f2f6;
-        --text-color: #000000;
-        --font: sans-serif;
+        --text-color: #000000 !important;
+        --background-color: #ffffff !important;
     }
-
-    /* 強制網頁本體背景為灰白色 */
     .stApp {
-        background-color: #f2f4f8 !important;
+        background-color: #f0f2f6 !important; /* 強制淺灰背景 */
     }
-    
-    /* 強制所有文字預設為黑色 */
-    .stApp, p, h1, h2, h3, div, span, label {
+    /* 強制所有文字為黑色 */
+    p, h1, h2, h3, div, span, label, li {
         color: #000000 !important;
     }
 
     /* =========================================
-       下拉選單 (Selectbox) 暴力修正
+       2. 任務工具箱 (Expander) 修正
        ========================================= */
-    /* 1. 選單的輸入框本體 */
+    /* 修正展開後的背景色變成黑色的問題 */
+    div[data-testid="stExpanderDetails"] {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border: 1px solid #cccccc !important;
+    }
+    /* 強制展開區塊內的所有文字 (包含 Checkbox) */
+    div[data-testid="stExpanderDetails"] * {
+        color: #000000 !important;
+    }
+    /* 修正 Expander 標題 */
+    div[data-testid="stExpander"] summary {
+        color: #000000 !important;
+        background-color: #e0e0e0 !important; /* 給標題一個淺灰底色 */
+        border-radius: 5px;
+    }
+
+    /* =========================================
+       3. 按鈕 (Link Button) 暴力重繪
+       包含：導航前往、找美食、開啟數據表
+       ========================================= */
+    /* 針對所有連結按鈕 (Link Button) */
+    div[data-testid="stLinkButton"] > a {
+        background-color: #ffffff !important;   /* 強制白底 */
+        color: #000000 !important;              /* 強制黑字 */
+        border: 2px solid #0066cc !important;   /* 深藍邊框 */
+        font-weight: 900 !important;            /* 超粗體 */
+        text-decoration: none !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+    }
+    
+    /* 滑鼠滑過時的效果 (讓使用者知道可以點) */
+    div[data-testid="stLinkButton"] > a:hover {
+        background-color: #e6f0ff !important;
+        color: #000000 !important;
+    }
+    
+    /* 針對「主要按鈕」(全程導航) 特別給予不同顏色 */
+    /* 這裡透過 Python 的 type='primary' 產生區別，我們用 CSS 抓取 */
+    /* 注意：Streamlit 有時會改變 class，所以我們維持統一白底黑字最安全 */
+
+    /* =========================================
+       4. 下拉選單 (Selectbox) 修正
+       ========================================= */
     div[data-baseweb="select"] > div {
         background-color: #ffffff !important;
-        border: 2px solid #0056b3 !important;
+        border: 2px solid #333 !important;
         color: #000000 !important;
     }
-    
-    /* 2. 選單內的顯示文字 (包含預選值) */
-    div[data-baseweb="select"] span {
-        color: #000000 !important;
-        -webkit-text-fill-color: #000000 !important; /* 針對 iOS Safari 強制填色 */
-        font-weight: bold !important;
-    }
-    
-    /* 3. 下拉後的選項清單 (Popover) */
-    div[data-baseweb="popover"], div[data-baseweb="menu"] {
-        background-color: #ffffff !important;
-    }
-    
-    /* 4. 清單中的選項文字 */
-    div[data-baseweb="menu"] li {
-        color: #000000 !important;
-        background-color: #ffffff !important;
-    }
-    /* 滑鼠滑過選項時的變色 */
-    div[data-baseweb="menu"] li:hover {
-        background-color: #e6f0ff !important;
-    }
-    
-    /* 5. 下拉選單上方的標題 Label */
     div[data-testid="stSelectbox"] label {
         color: #000000 !important;
-        font-size: 1.1rem !important;
-        font-weight: 800 !important;
+        font-weight: bold !important;
+    }
+    /* 選單內的文字強制黑色 */
+    div[data-baseweb="select"] span {
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
     }
 
     /* =========================================
-       自定義卡片設計
+       5. 卡片樣式 (維持不變，確保清晰)
        ========================================= */
     .event-card {
         background-color: #ffffff !important;
-        padding: 16px;
-        border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        margin-bottom: 15px;
-        border: 1px solid #cccccc;
-    }
-
-    /* 卡片內的文字強制黑色 */
-    .event-card .time-text {
-        font-size: 1.4rem;
-        font-weight: 900;
-        color: #000000 !important;
-        margin-right: 8px;
-    }
-    
-    .event-card .tag {
-        font-size: 0.8rem;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-weight: 700;
-        background-color: #e0e0e0 !important;
-        color: #333333 !important;
-        border: 1px solid #888;
-    }
-    
-    .event-card .loc-text {
-        font-size: 1.2rem;
-        font-weight: 800;
-        color: #0044cc !important; /* 深藍色標題 */
-        margin-top: 8px;
-    }
-    
-    .event-card .addr-text {
-        font-size: 1rem;
-        color: #333333 !important;
-        font-weight: 500;
-        margin-bottom: 12px;
-    }
-
-    /* Hero 區塊 */
-    .hero-container {
-        background-color: #004d99 !important;
-        padding: 20px;
+        padding: 15px;
         border-radius: 10px;
-        margin-bottom: 20px;
-        text-align: center;
+        border: 2px solid #bbbbbb;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
-    .hero-title {
-        color: #ffffff !important; /* 背景深藍，文字強制白 */
-        font-size: 1.6rem;
-        font-weight: 900;
-        margin: 0;
-    }
-    .hero-subtitle {
-        color: #dddddd !important;
-        font-size: 0.9rem;
-    }
+    .time-text { font-size: 1.4rem; font-weight: 900; color: #000 !important; margin-right: 10px;}
+    .loc-text { font-size: 1.2rem; font-weight: 800; color: #0056b3 !important; margin-top: 5px;}
+    .addr-text { font-size: 1rem; color: #333 !important; }
+    .tag { background: #ddd !important; color: #000 !important; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;}
 
     /* 隱藏 Footer */
     footer {display: none !important;}
@@ -203,26 +172,27 @@ def get_nearby_url(address, query):
 
 # [Hero 區塊]
 st.markdown("""
-    <div class="hero-container">
-        <div class="hero-title">EO Swim Tour 2025</div>
-        <div class="hero-subtitle">環島檢測任務助手</div>
+    <div style="background-color: #004d99; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; border: 2px solid white;">
+        <div style="color: white; font-size: 1.5rem; font-weight: 900;">EO Swim Tour 2025</div>
+        <div style="color: #ddd; font-size: 0.9rem;">環島檢測任務助手</div>
     </div>
 """, unsafe_allow_html=True)
 
-# [任務工具箱]
-with st.expander("🛠️ 任務工具箱"):
+# [任務工具箱] (使用 Expander)
+with st.expander("🛠️ 任務工具箱 (Checklist & Data)"):
     st.markdown("**離場前確認：**")
     c1, c2 = st.columns(2)
     with c1:
-        st.checkbox("eo 感測器 & iPad")
-        st.checkbox("三腳架 & 配件")
+        st.checkbox("eo 感測器")
+        st.checkbox("三腳架")
     with c2:
-        st.checkbox("個人錢包 / 鑰匙")
-        st.checkbox("延長線 / 電源")
+        st.checkbox("個人錢包")
+        st.checkbox("延長線")
     
     st.markdown("---")
     data_link = "https://docs.google.com/forms/" 
-    st.link_button("📝 開啟數據紀錄表 (Google Form)", data_link, use_container_width=True)
+    # 使用 container_width 讓按鈕填滿
+    st.link_button("📝 開啟數據紀錄表", data_link, use_container_width=True)
 
 # [日期選擇器]
 st.write("") 
@@ -234,7 +204,6 @@ for idx, day in enumerate(days_list):
         default_idx = idx
         break
 
-# 下拉選單
 selected_day = st.selectbox("📅 請選擇日期：", days_list, index=default_idx)
 events = schedule_data[selected_day]
 
@@ -242,10 +211,10 @@ events = schedule_data[selected_day]
 if len(events) > 1:
     st.write("")
     full_route = get_full_route_url(events)
+    # 這裡不使用 type="primary"，強制使用我們自定義的 CSS
     st.link_button(
         f"🗺️ 啟動 Day {selected_day.split(' ')[2]} 全程導航", 
         full_route, 
-        type="primary", 
         use_container_width=True
     )
 
@@ -275,7 +244,7 @@ for event in events:
     col_main, col_sub1, col_sub2, col_sub3 = st.columns([3, 1, 1, 1])
     
     with col_main:
-        st.link_button("📍 導航前往", get_google_maps_url(event['addr']), use_container_width=True)
+        st.link_button("📍 導航", get_google_maps_url(event['addr']), use_container_width=True)
     
     with col_sub1:
         st.link_button("🅿️", get_nearby_url(event['addr'], "parking"), help="找停車", use_container_width=True)
