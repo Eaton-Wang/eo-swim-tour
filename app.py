@@ -5,94 +5,93 @@ from datetime import datetime
 # --- 1. 頁面基礎設定 ---
 st.set_page_config(page_title="EO Swim Tour", page_icon="🏊", layout="centered")
 
-# --- 2. 絕對色彩鎖定 CSS (含按鈕強制亮色修復) ---
+# --- 2. 核彈級 CSS 強制覆蓋 (針對截圖問題修復) ---
 st.markdown("""
     <style>
     /* =========================================
-       1. 全域強制設定
+       1. 全域強制亮色 (Force Light Theme)
+       這會告訴瀏覽器：此網頁不支援深色模式
        ========================================= */
     :root {
-        --text-color: #000000 !important;
-        --background-color: #ffffff !important;
-    }
-    
-    /* 強制告訴瀏覽器：這個網頁只支援亮色模式 (關鍵修復) */
-    html, body, [data-testid="stAppViewContainer"] {
         color-scheme: light !important;
-        background-color: #f2f4f8 !important;
     }
-
-    /* 強制所有文字為黑色 */
-    p, h1, h2, h3, div, span, label, li {
+    html, body, [data-testid="stAppViewContainer"] {
+        background-color: #f4f6f9 !important; /* 淺灰白背景 */
         color: #000000 !important;
-    }
-
-    /* =========================================
-       2. 按鈕 (Link Button) 終極修復
-       解決：按鈕被強制變黑、看不到圖示
-       ========================================= */
-    div[data-testid="stLinkButton"] {
-        /* 強制按鈕區域只能是亮色 */
-        color-scheme: light !important; 
-    }
-
-    div[data-testid="stLinkButton"] > a {
-        background-color: #ffffff !important;   /* 絕對白底 */
-        color: #000000 !important;              /* 絕對黑字 */
-        border: 2px solid #0066cc !important;   /* 深藍邊框 (讓按鈕有輪廓) */
-        border-radius: 8px !important;
-        font-weight: 900 !important;
-        text-decoration: none !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important; /* 加上陰影 */
-        
-        /* 確保 Safari 不會偷偷改字體顏色 */
-        -webkit-text-fill-color: #000000 !important; 
-    }
-
-    /* 滑鼠滑過 / 手指按下的狀態 */
-    div[data-testid="stLinkButton"] > a:hover, div[data-testid="stLinkButton"] > a:active {
-        background-color: #e6f7ff !important;   /* 淺藍底 */
-        color: #000000 !important;
-        border-color: #004499 !important;
     }
     
-    /* 針對右側三個小按鈕 (🅿️, 🍱, ☕) 的特別優化 
-       我們用 CSS 選擇器 "a" 來統一處理，所以上面的設定會同時生效
-       這裡確保它們有足夠的寬度顯示圖示 */
-    div[data-testid="column"] div[data-testid="stLinkButton"] a {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 45px; /* 確保按鈕夠高，好按 */
+    /* 強制所有文字顏色為深黑 */
+    p, h1, h2, h3, h4, h5, h6, span, div, label, li, a {
+        color: #000000 !important;
     }
 
     /* =========================================
-       3. 下拉選單 (Selectbox) (維持您說已解決的設定)
+       2. 下拉選單 (Selectbox) 深度修復 (圖2問題)
        ========================================= */
+    /* 輸入框本體 */
     div[data-baseweb="select"] > div {
         background-color: #ffffff !important;
         border: 2px solid #000000 !important;
         color: #000000 !important;
     }
-    div[data-baseweb="select"] span {
-        color: #000000 !important;
-        -webkit-text-fill-color: #000000 !important;
-        font-weight: 900 !important;
+    
+    /* 關鍵：下拉後的清單容器 (Popover) */
+    div[data-baseweb="popover"] {
+        background-color: #ffffff !important;
+        border: 1px solid #ccc !important;
     }
-    div[data-baseweb="popover"], div[data-baseweb="menu"], ul[role="listbox"] {
+    
+    /* 關鍵：清單內的選項列表 */
+    div[data-baseweb="menu"], ul {
         background-color: #ffffff !important;
     }
+    
+    /* 關鍵：單一選項 (Option) */
     li[role="option"] {
+        background-color: #ffffff !important; /* 強制白底 */
+        color: #000000 !important;            /* 強制黑字 */
+        border-bottom: 1px solid #f0f0f0 !important;
+    }
+    
+    /* 選項文字 */
+    div[data-baseweb="menu"] span {
+        color: #000000 !important;
+    }
+
+    /* 滑鼠滑過 / 手指按下的反白效果 */
+    li[role="option"]:hover, li[role="option"][aria-selected="true"] {
+        background-color: #e6f7ff !important; /* 淺藍色高亮 */
+        color: #000000 !important;
+    }
+
+    /* =========================================
+       3. 按鈕 (Link Button) 深度修復 (圖1問題)
+       包含：導航、找停車、找美食、找咖啡
+       ========================================= */
+    
+    /* 針對所有 stLinkButton 內的 <a> 標籤 */
+    div[data-testid="stLinkButton"] a {
+        background-color: #ffffff !important;   /* 絕對白底 */
+        color: #000000 !important;              /* 絕對黑字 */
+        border: 2px solid #0066cc !important;   /* 深藍邊框 */
+        border-radius: 8px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+        font-weight: 800 !important;
+        
+        /* 確保 Safari/iPhone 不會反轉顏色 */
+        -webkit-text-fill-color: #000000 !important; 
+    }
+
+    /* 針對「欄位 (Column)」內的小按鈕特別加強權重 */
+    div[data-testid="column"] div[data-testid="stLinkButton"] a {
         background-color: #ffffff !important;
         color: #000000 !important;
-        border-bottom: 1px solid #eee !important;
+        border-color: #333333 !important; /* 小按鈕用深灰框，區分層級 */
     }
-    li[role="option"]:hover {
-        background-color: #e6f7ff !important;
-    }
-    div[data-testid="stSelectbox"] label {
-        color: #000000 !important;
-        font-weight: 800 !important;
+
+    /* 按下效果 */
+    div[data-testid="stLinkButton"] a:active {
+        background-color: #ddd !important;
     }
 
     /* =========================================
@@ -100,37 +99,39 @@ st.markdown("""
        ========================================= */
     div[data-testid="stExpander"] {
         background-color: #ffffff !important;
-        border-radius: 8px;
         border: 1px solid #ccc !important;
-    }
-    div[data-testid="stExpander"] summary {
         color: #000000 !important;
-        font-weight: bold;
     }
     div[data-testid="stExpanderDetails"] {
         background-color: #ffffff !important;
         color: #000000 !important;
     }
+    div[data-testid="stExpander"] summary {
+        color: #000000 !important; 
+    }
+    /* Checkbox 文字 */
+    div[data-testid="stCheckbox"] label span {
+        color: #000000 !important;
+    }
 
     /* =========================================
-       5. 卡片樣式
+       5. 卡片樣式 (維持清晰)
        ========================================= */
     .event-card {
         background-color: #ffffff !important;
-        padding: 16px;
+        padding: 15px;
         border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         margin-bottom: 15px;
-        border: 1px solid #999; /* 加深邊框 */
+        border: 1px solid #bbb; /* 加深邊框 */
     }
-    .time-text { font-size: 1.5rem; font-weight: 900; color: #000 !important; margin-right: 8px;}
+    .time-text { font-size: 1.4rem; font-weight: 900; color: #000 !important; margin-right: 8px;}
     .loc-text { font-size: 1.2rem; font-weight: 800; color: #0056b3 !important; margin-top: 5px;}
     .addr-text { font-size: 1rem; color: #333 !important; margin-bottom: 10px;}
-    .tag { background: #eee !important; color: #000 !important; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;}
+    .tag { background: #eee !important; color: #000 !important; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;}
 
     /* 隱藏 Footer */
-    footer {display: none !important;}
-    header {display: none !important;}
+    footer, header {display: none !important;}
     </style>
 """, unsafe_allow_html=True)
 
@@ -218,7 +219,6 @@ with st.expander("🛠️ 任務工具箱 (Checklist & Data)"):
     
     st.markdown("---")
     data_link = "https://docs.google.com/forms/" 
-    # 使用 container_width 讓按鈕填滿
     st.link_button("📝 開啟數據紀錄表", data_link, use_container_width=True)
 
 # [日期選擇器]
@@ -239,7 +239,7 @@ events = schedule_data[selected_day]
 if len(events) > 1:
     st.write("")
     full_route = get_full_route_url(events)
-    # 這裡不使用 type="primary"，強制使用我們自定義的 CSS
+    # 不使用 type='primary'，確保使用我們的 CSS
     st.link_button(
         f"🗺️ 啟動 Day {selected_day.split(' ')[2]} 全程導航", 
         full_route, 
@@ -268,12 +268,13 @@ for event in events:
     </div>
     """, unsafe_allow_html=True)
     
-    # 按鈕區
+    # 按鈕區 (使用 Streamlit 原生 Columns)
     col_main, col_sub1, col_sub2, col_sub3 = st.columns([3, 1, 1, 1])
     
     with col_main:
         st.link_button("📍 導航", get_google_maps_url(event['addr']), use_container_width=True)
     
+    # 這三個小按鈕現在應該會是白底黑字了
     with col_sub1:
         st.link_button("🅿️", get_nearby_url(event['addr'], "parking"), help="找停車", use_container_width=True)
     with col_sub2:
