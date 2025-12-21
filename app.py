@@ -1,28 +1,27 @@
 import streamlit as st
 import urllib.parse
 from datetime import datetime
+import os
 
 # --- 1. 頁面基礎設定 ---
 st.set_page_config(page_title="EO Swim Tour", page_icon="🏊", layout="centered")
 
-# --- 2. 品牌色彩 CSS 與 LOGO 配置 ---
+# --- 2. 品牌色彩 CSS ---
 st.markdown("""
     <style>
     /* =========================================
-       1. 品牌色彩定義 (源自勝競運動文化 LOGO)
+       1. 品牌色彩定義 (勝競與 SJ 配色)
        ========================================= */
     :root {
-        --brand-blue: #0072CE;    /* Pantone 7688 C */
-        --brand-red: #D03027;     /* Pantone 7597 C */
-        --brand-yellow: #EACE2B;  /* Pantone 610 C */
-        --brand-green: #009B48;   /* Pantone 7738 C */
+        --brand-blue: #0072CE;    /* 勝競藍 */
+        --brand-red: #D03027;     /* 勝競紅 */
+        --brand-yellow: #EACE2B;  /* 勝競黃 */
+        --brand-green: #009B48;   /* 勝競綠 */
         --text-black: #000000;
-        --bg-light: #F8F9FA;      /* 淺灰白背景 */
+        --bg-light: #F8F9FA;
     }
 
-    /* =========================================
-       2. 全域強制亮色設定
-       ========================================= */
+    /* 全域強制亮色設定 */
     html, body, [data-testid="stAppViewContainer"] {
         color-scheme: light !important;
         background-color: var(--bg-light) !important;
@@ -33,8 +32,9 @@ st.markdown("""
     }
 
     /* =========================================
-       3. 下拉選單 (Selectbox) 修復
+       2. 元件樣式修復
        ========================================= */
+    /* 下拉選單 */
     div[data-baseweb="select"] > div {
         background-color: #ffffff !important;
         border: 2px solid var(--brand-blue) !important;
@@ -56,10 +56,7 @@ st.markdown("""
         color: var(--brand-blue) !important;
     }
 
-    /* =========================================
-       4. 按鈕 (Link Button) 品牌化
-       ========================================= */
-    /* 通用按鈕樣式：強制亮色、品牌藍框、黑字 */
+    /* 按鈕優化 */
     div[data-testid="stLinkButton"] a {
         color-scheme: light !important;
         background-color: #ffffff !important;
@@ -68,52 +65,41 @@ st.markdown("""
         border-radius: 8px !important;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
         font-weight: 800 !important;
-        -webkit-text-fill-color: var(--text-black) !important;
         text-decoration: none !important;
-        transition: all 0.2s ease-in-out;
+        -webkit-text-fill-color: var(--text-black) !important;
     }
     div[data-testid="stLinkButton"] a:active {
         background-color: #eee !important;
         transform: scale(0.98);
     }
 
-    /* --- 針對不同功能按鈕的色彩客製化 --- */
-    
-    /* [全程導航] & [單點導航]：使用品牌藍 */
-    /* 這裡使用 CSS 選擇器技巧，預設所有按鈕都是藍色 */
-
-    /* [找停車 🅿️]：使用品牌藍 (與導航一致) */
+    /* 特定功能按鈕顏色 */
+    /* 找停車 (藍) */
     div[data-testid="column"]:nth-child(2) div[data-testid="stLinkButton"] a {
         border-color: var(--brand-blue) !important;
         color: var(--brand-blue) !important;
         -webkit-text-fill-color: var(--brand-blue) !important;
     }
-
-    /* [找美食 🍱]：使用品牌紅 */
+    /* 找美食 (紅) */
     div[data-testid="column"]:nth-child(3) div[data-testid="stLinkButton"] a {
         border-color: var(--brand-red) !important;
         color: var(--brand-red) !important;
         -webkit-text-fill-color: var(--brand-red) !important;
     }
-
-    /* [找咖啡 ☕]：使用品牌黃 */
+    /* 找咖啡 (黃 - 加深以利閱讀) */
     div[data-testid="column"]:nth-child(4) div[data-testid="stLinkButton"] a {
         border-color: var(--brand-yellow) !important;
-        color: #9A8B1F !important; /* 黃色文字稍微調深一點，增加閱讀性 */
-        -webkit-text-fill-color: #9A8B1F !important;
+        color: #B5A01A !important; 
+        -webkit-text-fill-color: #B5A01A !important;
     }
-
-    /* [開啟數據紀錄表]：使用品牌綠 */
-    /* 透過上一層的 div 來定位這個單獨的按鈕 */
+    /* 數據紀錄表 (綠) */
     .st-emotion-cache-13ln4jf div[data-testid="stLinkButton"] a {
         border-color: var(--brand-green) !important;
         color: var(--brand-green) !important;
         -webkit-text-fill-color: var(--brand-green) !important;
     }
 
-    /* =========================================
-       5. 卡片與標籤樣式
-       ========================================= */
+    /* 卡片與標籤 */
     .event-card {
         background-color: #ffffff !important;
         padding: 15px;
@@ -121,36 +107,16 @@ st.markdown("""
         box-shadow: 0 4px 10px rgba(0,0,0,0.08);
         margin-bottom: 15px;
         border: 1px solid #eee;
-        border-left: 5px solid var(--brand-blue); /* 預設藍色側邊條 */
+        border-left: 5px solid var(--brand-blue);
     }
     .time-text { font-size: 1.4rem; font-weight: 900; color: var(--text-black) !important; margin-right: 8px;}
     .loc-text { font-size: 1.2rem; font-weight: 800; color: var(--text-black) !important; margin-top: 5px;}
     .addr-text { font-size: 1rem; color: #555 !important; margin-bottom: 10px; display: flex; align-items: center;}
     
-    /* 標籤 (Tag) - 根據類型變色 */
     .tag { padding: 3px 10px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; color: #fff !important; -webkit-text-fill-color: #fff !important;}
     .tag-swim { background-color: var(--brand-blue) !important; }
     .tag-travel { background-color: var(--brand-red) !important; }
     .tag-sleep { background-color: var(--brand-green) !important; }
-
-    /* =========================================
-       6. 頂部 Logo 橫幅
-       ========================================= */
-    .logo-banner {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background-color: #fff;
-        padding: 10px 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
-    }
-    .logo-img {
-        height: 60px; /* 調整 Logo 高度 */
-        width: auto;
-        object-fit: contain;
-    }
 
     /* 隱藏 Footer/Header */
     footer, header {display: none !important;}
@@ -206,7 +172,7 @@ schedule_data = {
     ],
 }
 
-# --- 4. 輔助函式 (連結產生器) ---
+# --- 4. 輔助函式 ---
 def get_google_maps_url(address):
     return f"http://googleusercontent.com/maps.google.com/maps?daddr={urllib.parse.quote(address)}"
 
@@ -220,21 +186,33 @@ def get_nearby_url(address, query):
 
 # --- 5. 主程式介面 ---
 
-# [Hero 區塊 - 品牌 Logo 橫幅]
-# 請注意：這裡使用網路上的圖片連結作為範例，實際部署時建議將圖片上傳到 GitHub 並使用相對路徑
-logo_sj_swim = "https://i.imgur.com/8Q5Xq9r.png" # 假設的 SJ Swim Logo 連結
-logo_s_sport = "https://i.imgur.com/0a3X6Q1.png" # 假設的勝競 Logo 連結
+# [品牌 Logo 橫幅 - 改用 Streamlit 原生 Columns 以支援本地檔案]
+c1, c2, c3 = st.columns([1, 2, 1])
 
-st.markdown(f"""
-    <div class="logo-banner">
-        <img src="{logo_s_sport}" class="logo-img" alt="勝競運動文化">
-        <div style="text-align: center;">
-            <div style="font-size: 1.4rem; font-weight: 900; color: var(--brand-blue);">EO Swim Tour 2025</div>
+# LOGO 1: 勝競 (logo_s.png)
+with c1:
+    if os.path.exists("logo_s.png"):
+        st.image("logo_s.png", use_container_width=True)
+    else:
+        st.caption("請上傳 logo_s.png")
+
+# 中間文字
+with c2:
+    st.markdown("""
+        <div style="text-align: center; padding-top: 10px;">
+            <div style="font-size: 1.5rem; font-weight: 900; color: #0072CE;">EO Swim Tour 2025</div>
             <div style="font-size: 0.9rem; color: #666;">環島檢測任務助手</div>
         </div>
-        <img src="{logo_sj_swim}" class="logo-img" alt="SJ Swim Training">
-    </div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+
+# LOGO 2: SJ (logo_sj.png)
+with c3:
+    if os.path.exists("logo_sj.png"):
+        st.image("logo_sj.png", use_container_width=True)
+    else:
+        st.caption("請上傳 logo_sj.png")
+
+st.write("") # Spacer
 
 # [數據紀錄表按鈕]
 data_link = "https://docs.google.com/forms/" 
@@ -297,17 +275,13 @@ for event in events:
     col_main, col_sub1, col_sub2, col_sub3 = st.columns([3, 1, 1, 1])
     
     with col_main:
-        # 導航按鈕 (品牌藍)
         st.link_button("📍 導航", get_google_maps_url(event['addr']), use_container_width=True)
     
     with col_sub1:
-        # 找停車 (品牌藍)
         st.link_button("🅿️", get_nearby_url(event['addr'], "parking"), help="找停車", use_container_width=True)
     with col_sub2:
-        # 找美食 (品牌紅)
         st.link_button("🍱", get_nearby_url(event['addr'], "restaurants"), help="找美食", use_container_width=True)
     with col_sub3:
-        # 找咖啡 (品牌黃)
         st.link_button("☕", get_nearby_url(event['addr'], "coffee"), help="找咖啡", use_container_width=True)
 
 st.markdown("<br><br>", unsafe_allow_html=True)
