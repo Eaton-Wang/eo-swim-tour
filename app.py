@@ -5,108 +5,106 @@ from datetime import datetime
 # --- 1. 頁面基礎設定 ---
 st.set_page_config(page_title="EO Swim Tour 2025", page_icon="🏊", layout="centered")
 
-# --- 2. 專業級 CSS 美化 ---
+# --- 2. 柔和護眼 CSS ---
 st.markdown("""
     <style>
-    /* 全局字體與背景 */
+    /* 全局背景：柔和的灰白色，避免全白刺眼 */
     .stApp {
-        background-color: #f8f9fa;
+        background-color: #f4f6f9;
     }
     
-    /* 頂部 Hero 區塊 */
+    /* 頂部 Hero 區塊：深岩灰色，專業沈穩 */
     .hero-container {
-        background: linear-gradient(135deg, #0062cc 0%, #00a8e8 100%);
-        padding: 25px 20px;
-        border-radius: 0 0 25px 25px;
-        color: white;
-        margin: -60px -20px 20px -20px; /* 抵銷 Streamlit 預設邊距 */
-        box-shadow: 0 4px 15px rgba(0, 100, 200, 0.2);
+        background-color: #2c3e50;
+        padding: 30px 20px;
+        border-radius: 0 0 20px 20px;
+        color: #ecf0f1;
+        margin: -60px -20px 20px -20px;
         text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .hero-title {
-        font-size: 1.8rem;
-        font-weight: 800;
+        font-size: 1.6rem;
+        font-weight: 700;
         margin: 0;
         letter-spacing: 1px;
-        font-family: 'Helvetica Neue', sans-serif;
     }
     .hero-subtitle {
         font-size: 0.9rem;
-        opacity: 0.9;
+        color: #bdc3c7;
         margin-top: 5px;
-        font-weight: 300;
+        font-weight: 400;
     }
 
-    /* 行程卡片設計 */
+    /* 卡片設計：純白底 + 極輕微陰影 */
     .event-card {
         background-color: #ffffff;
         padding: 20px;
-        border-radius: 16px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        margin-bottom: 15px;
+        border-radius: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.03); /* 極淡陰影 */
+        margin-bottom: 12px;
+        border: 1px solid #e1e4e8; /* 增加細微邊框增加輪廓感 */
         position: relative;
-        border: 1px solid #f0f0f0;
-        transition: transform 0.2s;
     }
     
-    /* 左側跳色條 (依照類型) */
-    .border-swim { border-left: 6px solid #0062cc; }
-    .border-travel { border-left: 6px solid #27ae60; }
-    .border-sleep { border-left: 6px solid #8e44ad; }
-    .border-default { border-left: 6px solid #95a5a6; }
+    /* 左側線條：使用低飽和度顏色 */
+    .border-swim { border-left: 5px solid #5d9cec; } /* 柔和藍 */
+    .border-travel { border-left: 5px solid #a0d468; } /* 柔和綠 */
+    .border-sleep { border-left: 5px solid #ac92ec; } /* 柔和紫 */
+    .border-default { border-left: 5px solid #ccd1d9; } /* 淺灰 */
 
-    /* 卡片內容排版 */
+    /* 內容排版 */
     .time-badge {
-        font-size: 1.4rem;
-        font-weight: 800;
-        color: #2c3e50;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50; /* 深灰藍色，比純黑舒服 */
         font-family: 'Roboto', sans-serif;
     }
+    
+    /* 標籤優化：淺底深字 (護眼關鍵) */
     .note-badge {
         display: inline-block;
-        background: #eef2f7;
-        color: #555;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.75rem;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
         font-weight: 600;
-        vertical-align: middle;
         margin-left: 8px;
+        vertical-align: middle;
     }
+    /* 不同類型的標籤配色 */
+    .badge-swim { background-color: #eaf4fe; color: #2b6cb0; }
+    .badge-travel { background-color: #f0fff4; color: #2f855a; }
+    .badge-sleep { background-color: #faf5ff; color: #6b46c1; }
+    .badge-default { background-color: #f7fafc; color: #4a5568; }
+
     .loc-title {
-        font-size: 1.15rem;
-        font-weight: 700;
-        color: #333;
-        margin-top: 8px;
-        margin-bottom: 2px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #34495e;
+        margin-top: 10px;
+        margin-bottom: 4px;
     }
     .addr-text {
-        font-size: 0.85rem;
-        color: #888;
+        font-size: 0.9rem;
+        color: #7f8c8d; /* 中灰色 */
         display: flex;
         align-items: center;
-        margin-bottom: 12px;
+        margin-bottom: 15px;
     }
 
     /* 按鈕優化 */
-    .stButton>button {
-        border-radius: 12px;
-        font-weight: 600;
-        border: none;
-        transition: all 0.2s;
-    }
-    /* 主要按鈕微調 */
     div[data-testid="stLinkButton"] > a {
-        border-radius: 12px;
-        font-weight: bold;
+        border-radius: 8px;
+        font-weight: 600;
+        box-shadow: none;
     }
     
-    /* 隱藏 Streamlit footer */
+    /* 隱藏 Footer */
     footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. 資料區 (您的完整行程) ---
+# --- 3. 資料區 ---
 schedule_data = {
     "12/22 (一) Day 1": [
         {"time": "07:30", "loc": "台南出發", "addr": "台南市", "note": "出發", "type": "travel"},
@@ -168,39 +166,38 @@ def get_nearby_url(address, query):
     return f"https://www.google.com/maps/search/{query}+near+{urllib.parse.quote(address)}"
 
 def get_type_style(event_type):
-    # 回傳對應的 CSS class
-    return f"border-{event_type}" if event_type else "border-default"
+    # 回傳邊框 class 和 badge class
+    return f"border-{event_type}", f"badge-{event_type}"
 
 # --- 5. 主程式介面 ---
 
 # [Hero 區塊]
 st.markdown("""
     <div class="hero-container">
-        <div class="hero-title">EO Swim Tour</div>
-        <div class="hero-subtitle">2025 台灣環島檢測之旅</div>
+        <div class="hero-title">EO Swim Tour 2025</div>
+        <div class="hero-subtitle">環島檢測任務</div>
     </div>
 """, unsafe_allow_html=True)
 
-# [檢查清單 & 數據連結] (摺疊以保持整潔)
-with st.expander("🛠️ 工具箱 (檢查清單 / 數據紀錄)"):
-    st.markdown("**設備檢查：**")
-    c_check1, c_check2 = st.columns(2)
-    with c_check1:
-        st.checkbox("eo 主機 & iPad")
-        st.checkbox("三腳架 & 快拆")
-    with c_check2:
-        st.checkbox("延長線 & 轉接頭")
-        st.checkbox("個人錢包手機")
+# [工具箱] (使用 st.expander)
+with st.expander("🛠️ 快速檢查 & 數據"):
+    c1, c2 = st.columns(2)
+    with c1:
+        st.caption("出發檢查")
+        st.checkbox("eo 主機 / iPad")
+        st.checkbox("三腳架 / 轉接頭")
+    with c2:
+        st.caption("其他")
+        st.checkbox("錢包手機鑰匙")
+        st.checkbox("延長線")
     
     st.markdown("---")
-    # 請替換成您的 Google Form 連結
-    data_link = "https://docs.google.com/forms/" 
-    st.link_button("📝 開啟數據紀錄表 (Google Form)", data_link, use_container_width=True)
+    # 數據表單連結
+    st.link_button("📝 填寫檢測數據", "https://docs.google.com/forms/", use_container_width=True)
 
-# [日期選擇器]
-st.write("") # Spacer
+# [日期選擇]
+st.write("") 
 days_list = list(schedule_data.keys())
-# 嘗試自動選取今日
 today_str = datetime.now().strftime("%m/%d")
 default_idx = 0
 for idx, day in enumerate(days_list):
@@ -211,50 +208,47 @@ for idx, day in enumerate(days_list):
 selected_day = st.selectbox("📅 選擇行程日期：", days_list, index=default_idx)
 events = schedule_data[selected_day]
 
-# [全程導航按鈕]
+# [全程導航]
 if len(events) > 1:
     st.write("")
     full_route = get_full_route_url(events)
     st.link_button(
-        f"🗺️ 啟動 Day {selected_day.split(' ')[2]} 全程導航", 
+        f"🗺️ {selected_day.split(' ')[2]} 全程導航", 
         full_route, 
         type="primary",
         use_container_width=True
     )
 
-st.write("") # Spacer
+st.write("") 
 
-# [行程卡片渲染 Loop]
+# [卡片渲染]
 for event in events:
-    # 判斷類型樣式 (若資料沒有標註 type，預設 default)
     evt_type = event.get('type', 'default')
-    border_class = get_type_style(evt_type)
+    border_class, badge_class = get_type_style(evt_type)
     
-    # 決定 icon
     icon = "📍"
     if evt_type == "swim": icon = "🏊"
     elif evt_type == "travel": icon = "🚗"
     elif evt_type == "sleep": icon = "🛌"
 
-    # 渲染卡片 HTML
     st.markdown(f"""
     <div class="event-card {border_class}">
         <div>
             <span class="time-badge">{event['time']}</span>
-            <span class="note-badge">{icon} {event['note']}</span>
+            <span class="note-badge {badge_class}">{icon} {event['note']}</span>
         </div>
         <div class="loc-title">{event['loc']}</div>
         <div class="addr-text">🏠 {event['addr']}</div>
     </div>
     """, unsafe_allow_html=True)
     
-    # 功能按鈕區 (使用 Streamlit 原生 Columns 排版)
+    # 按鈕區
     col_main, col_sub1, col_sub2, col_sub3 = st.columns([3, 1, 1, 1])
     
     with col_main:
         st.link_button("📍 導航前往", get_google_maps_url(event['addr']), use_container_width=True)
     
-    # 小圖示按鈕
+    # 縮小版周邊按鈕
     with col_sub1:
         st.link_button("🅿️", get_nearby_url(event['addr'], "parking"), help="找停車場", use_container_width=True)
     with col_sub2:
@@ -262,4 +256,4 @@ for event in events:
     with col_sub3:
         st.link_button("☕", get_nearby_url(event['addr'], "coffee"), help="找咖啡", use_container_width=True)
 
-st.markdown("<br><br><div style='text-align: center; color: #ccc; font-size: 0.8rem;'>Drive Safe. Swim Fast.</div>", unsafe_allow_html=True)
+st.markdown("<br><div style='text-align: center; color: #b0b0b0; font-size: 0.8rem;'>Have a safe trip!</div>", unsafe_allow_html=True)
