@@ -45,7 +45,7 @@ schedule_data = {
     "12/24 (三) Day 3": [
         {"time": "Morning", "loc": "花蓮出發", "addr": "花蓮縣", "note": "前往宜蘭"},
         {"time": "15:00", "loc": "宜蘭市區", "addr": "宜蘭縣宜蘭市校舍路1號", "note": "檢測點"},
-        {"time": "19:00", "loc": "基隆暖暖", "addr": "基隆市暖暖區暖暖街350號", "note": "檢測點"},
+        {"time": "18:00", "loc": "新北中和 (中和國小)", "addr": "新北市中和區中和路100號", "note": "新增檢測點"},
         {"time": "Night", "loc": "返回永和", "addr": "新北市永和區永平路205號", "note": "住宿"},
     ],
     "12/25 (四) Day 4": [
@@ -80,7 +80,7 @@ schedule_data = {
 # --- 輔助函式 ---
 def get_google_maps_url(address):
     # 使用 query 參數確保精準導航
-    return f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(address)}"
+    return f"http://googleusercontent.com/maps.google.com/maps?daddr={urllib.parse.quote(address)}"
 
 def get_full_route_url(events):
     # 產生多點導航連結
