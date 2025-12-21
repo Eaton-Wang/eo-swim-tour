@@ -5,11 +5,11 @@ from datetime import datetime
 # --- 1. 頁面基礎設定 ---
 st.set_page_config(page_title="EO Swim Tour", page_icon="🏊", layout="centered")
 
-# --- 2. 絕對色彩鎖定 CSS (針對深色模式強制修正) ---
+# --- 2. CSS 樣式表 (強制亮色與高對比) ---
 st.markdown("""
     <style>
     /* =========================================
-       1. 全域強制亮色 (Force Light Theme)
+       1. 全域強制亮色模式 (解決手機深色模式變黑問題)
        ========================================= */
     :root {
         color-scheme: light !important;
@@ -25,7 +25,7 @@ st.markdown("""
     }
 
     /* =========================================
-       2. 下拉選單 (Selectbox) 深度修復
+       2. 下拉選單 (Selectbox) 樣式鎖定
        ========================================= */
     /* 輸入框本體 */
     div[data-baseweb="select"] > div {
@@ -34,18 +34,17 @@ st.markdown("""
         color: #000000 !important;
     }
     
-    /* 下拉後的清單容器 (Popover) */
-    div[data-baseweb="popover"] {
-        background-color: #ffffff !important;
-        border: 1px solid #ccc !important;
+    /* 下拉選單圖示 */
+    div[data-baseweb="select"] svg {
+        fill: #000000 !important;
     }
     
-    /* 清單內的選項列表 */
-    div[data-baseweb="menu"], ul {
+    /* 下拉後的清單容器 */
+    div[data-baseweb="popover"], div[data-baseweb="menu"], ul {
         background-color: #ffffff !important;
     }
     
-    /* 單一選項 (Option) */
+    /* 單一選項 */
     li[role="option"] {
         background-color: #ffffff !important;
         color: #000000 !important;
@@ -64,7 +63,7 @@ st.markdown("""
     }
 
     /* =========================================
-       3. 按鈕 (Link Button) 深度修復
+       3. 按鈕 (Link Button) 樣式鎖定
        ========================================= */
     div[data-testid="stLinkButton"] a {
         background-color: #ffffff !important;   /* 絕對白底 */
@@ -73,18 +72,23 @@ st.markdown("""
         border-radius: 8px !important;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
         font-weight: 800 !important;
+        text-decoration: none !important;
+        
+        /* 針對 Safari 的強制填色 */
         -webkit-text-fill-color: #000000 !important; 
     }
 
-    /* 針對「欄位 (Column)」內的小按鈕特別加強 */
+    /* 針對「欄位 (Column)」內的小按鈕 (停車/美食) */
     div[data-testid="column"] div[data-testid="stLinkButton"] a {
         background-color: #ffffff !important;
         color: #000000 !important;
-        border-color: #333333 !important;
+        border-color: #666666 !important; /* 深灰框，區分層級 */
     }
 
+    /* 按下效果 */
     div[data-testid="stLinkButton"] a:active {
         background-color: #ddd !important;
+        transform: scale(0.98);
     }
 
     /* =========================================
@@ -103,12 +107,12 @@ st.markdown("""
     .addr-text { font-size: 1rem; color: #333 !important; margin-bottom: 10px;}
     .tag { background: #eee !important; color: #000 !important; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;}
 
-    /* 隱藏 Footer */
+    /* 隱藏多餘元素 */
     footer, header {display: none !important;}
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. 資料區 (您的完整行程) ---
+# --- 3. 行程資料 (經過多次確認的最終版本) ---
 schedule_data = {
     "12/22 (一) Day 1": [
         {"time": "07:30", "loc": "台南出發", "addr": "台南市", "note": "出發", "type": "travel"},
@@ -157,16 +161,22 @@ schedule_data = {
     ],
 }
 
-# --- 4. 輔助函式 ---
+# --- 4. 輔助函式 (連結產生器 - 已修正為 HTTPS 標準格式) ---
 def get_google_maps_url(address):
-    return f"http://googleusercontent.com/maps.google.com/maps?daddr={urllib.parse.quote(address)}"
+    # 單點導航：使用 Google Maps 官方 Universal Link
+    # destination: 目的地地址
+    return f"https://www.google.com/maps/dir/?api=1&destination={urllib.parse.quote(address)}"
 
 def get_full_route_url(events):
+    # 多點導航：使用 Google Maps 傳統多點格式
+    # 格式: https://www.google.com/maps/dir/點A/點B/點C
     base = "https://www.google.com/maps/dir/"
+    # 這裡我們只取地址部分，並進行 URL 編碼
     addrs = [urllib.parse.quote(e['addr']) for e in events]
     return base + "/".join(addrs)
 
 def get_nearby_url(address, query):
+    # 周邊搜尋：使用 Google Maps 搜尋格式
     return f"https://www.google.com/maps/search/{query}+near+{urllib.parse.quote(address)}"
 
 # --- 5. 主程式介面 ---
@@ -179,7 +189,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# [數據紀錄表按鈕 - 獨立移出]
+# [數據紀錄表按鈕]
 data_link = "https://docs.google.com/forms/" 
 st.link_button("📝 開啟數據紀錄表 (Google Form)", data_link, use_container_width=True)
 
@@ -229,18 +239,21 @@ for event in events:
     </div>
     """, unsafe_allow_html=True)
     
-    # 按鈕區
+    # 按鈕區 (使用 Streamlit 原生 Columns)
     col_main, col_sub1, col_sub2, col_sub3 = st.columns([3, 1, 1, 1])
     
     with col_main:
+        # 導航按鈕 (已修正連結)
         st.link_button("📍 導航", get_google_maps_url(event['addr']), use_container_width=True)
     
-    # 這三個小按鈕現在應該會是白底黑字了
     with col_sub1:
+        # 找停車 (已修正連結與配色)
         st.link_button("🅿️", get_nearby_url(event['addr'], "parking"), help="找停車", use_container_width=True)
     with col_sub2:
-        st.link_button("🍱", get_nearby_url(event['addr'], "food"), help="找美食", use_container_width=True)
+        # 找美食 (已修正連結與配色)
+        st.link_button("🍱", get_nearby_url(event['addr'], "restaurants"), help="找美食", use_container_width=True)
     with col_sub3:
+        # 找咖啡 (已修正連結與配色)
         st.link_button("☕", get_nearby_url(event['addr'], "coffee"), help="找咖啡", use_container_width=True)
 
 st.markdown("<br><br>", unsafe_allow_html=True)
