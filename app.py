@@ -5,116 +5,133 @@ from datetime import datetime
 # --- 1. 頁面基礎設定 ---
 st.set_page_config(page_title="EO Swim Tour", page_icon="🏊", layout="centered")
 
-# --- 2. 強制高對比 CSS (無視手機深色模式) ---
+# --- 2. 絕對色彩 CSS (無視系統深色模式) ---
 st.markdown("""
     <style>
-    /* 1. 強制全域背景為淺灰色，文字為純黑色 */
-    .stApp {
-        background-color: #f0f2f6 !important;
+    /* =========================================
+       核心強制設定 (Root Variables)
+       這會強制 Streamlit 核心元件使用亮色系
+       ========================================= */
+    :root {
+        --primary-color: #0066cc;
+        --background-color: #ffffff;
+        --secondary-background-color: #f0f2f6;
+        --text-color: #000000;
+        --font: sans-serif;
     }
-    h1, h2, h3, h4, h5, h6, p, div, span, label {
+
+    /* 強制網頁本體背景為灰白色 */
+    .stApp {
+        background-color: #f2f4f8 !important;
+    }
+    
+    /* 強制所有文字預設為黑色 */
+    .stApp, p, h1, h2, h3, div, span, label {
         color: #000000 !important;
     }
 
-    /* 2. 針對下拉選單 (Selectbox) 的強力修正 */
-    /* 選單的外框：強制白底、黑字、深藍邊框 */
+    /* =========================================
+       下拉選單 (Selectbox) 暴力修正
+       ========================================= */
+    /* 1. 選單的輸入框本體 */
     div[data-baseweb="select"] > div {
         background-color: #ffffff !important;
-        color: #000000 !important;
-        border: 2px solid #0066cc !important;
-        border-radius: 8px !important;
-    }
-    /* 選單內的文字 */
-    div[data-testid="stSelectbox"] div[data-baseweb="select"] span {
+        border: 2px solid #0056b3 !important;
         color: #000000 !important;
     }
-    /* 下拉選單的標題 (Label) */
-    div[data-testid="stSelectbox"] label {
-        font-size: 1.1rem !important;
-        font-weight: 800 !important;
-        color: #1f1f1f !important;
-        margin-bottom: 5px !important;
+    
+    /* 2. 選單內的顯示文字 (包含預選值) */
+    div[data-baseweb="select"] span {
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important; /* 針對 iOS Safari 強制填色 */
+        font-weight: bold !important;
     }
-    /* 下拉後的選項選單 (Popover) */
-    div[data-baseweb="popover"] {
+    
+    /* 3. 下拉後的選項清單 (Popover) */
+    div[data-baseweb="popover"], div[data-baseweb="menu"] {
         background-color: #ffffff !important;
     }
+    
+    /* 4. 清單中的選項文字 */
     div[data-baseweb="menu"] li {
         color: #000000 !important;
         background-color: #ffffff !important;
     }
-
-    /* 3. Hero 標題區塊 */
-    .hero-container {
-        background-color: #004d99 !important; /* 深藍色背景 */
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        text-align: center;
-        border: 1px solid #003366;
+    /* 滑鼠滑過選項時的變色 */
+    div[data-baseweb="menu"] li:hover {
+        background-color: #e6f0ff !important;
     }
-    .hero-title {
-        color: #ffffff !important; /* 這裡強制白色，因為背景是深藍 */
-        font-size: 1.5rem;
-        font-weight: 900;
-        margin: 0;
-    }
-    .hero-subtitle {
-        color: #e0e0e0 !important; /* 這裡強制淺灰 */
-        font-size: 0.9rem;
-        margin-top: 5px;
+    
+    /* 5. 下拉選單上方的標題 Label */
+    div[data-testid="stSelectbox"] label {
+        color: #000000 !important;
+        font-size: 1.1rem !important;
+        font-weight: 800 !important;
     }
 
-    /* 4. 行程卡片設計 (高對比) */
+    /* =========================================
+       自定義卡片設計
+       ========================================= */
     .event-card {
         background-color: #ffffff !important;
         padding: 16px;
         border-radius: 12px;
-        /* 很深的陰影，讓卡片浮起來 */
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         margin-bottom: 15px;
-        border: 2px solid #d1d1d1; /* 明顯的灰色邊框 */
+        border: 1px solid #cccccc;
     }
 
-    /* 時間文字 */
-    .time-text {
+    /* 卡片內的文字強制黑色 */
+    .event-card .time-text {
         font-size: 1.4rem;
         font-weight: 900;
         color: #000000 !important;
-        margin-right: 10px;
+        margin-right: 8px;
     }
     
-    /* 標籤 (Tag) */
-    .tag {
-        font-size: 0.85rem;
-        padding: 4px 10px;
-        border-radius: 6px;
+    .event-card .tag {
+        font-size: 0.8rem;
+        padding: 3px 8px;
+        border-radius: 4px;
         font-weight: 700;
         background-color: #e0e0e0 !important;
-        color: #000000 !important;
-        border: 1px solid #999;
+        color: #333333 !important;
+        border: 1px solid #888;
     }
     
-    /* 地點與地址 */
-    .loc-text {
+    .event-card .loc-text {
         font-size: 1.2rem;
         font-weight: 800;
-        color: #004085 !important; /* 深藍色文字 */
+        color: #0044cc !important; /* 深藍色標題 */
         margin-top: 8px;
     }
-    .addr-text {
-        font-size: 0.95rem;
+    
+    .event-card .addr-text {
+        font-size: 1rem;
+        color: #333333 !important;
         font-weight: 500;
-        color: #333333 !important; /* 深灰色 */
-        margin-bottom: 15px;
+        margin-bottom: 12px;
     }
 
-    /* 5. 按鈕優化 */
-    /* 導航按鈕：深藍底白字 */
-    div[data-testid="column"] a {
-        border: 1px solid #000 !important;
+    /* Hero 區塊 */
+    .hero-container {
+        background-color: #004d99 !important;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
     }
-    
+    .hero-title {
+        color: #ffffff !important; /* 背景深藍，文字強制白 */
+        font-size: 1.6rem;
+        font-weight: 900;
+        margin: 0;
+    }
+    .hero-subtitle {
+        color: #dddddd !important;
+        font-size: 0.9rem;
+    }
+
     /* 隱藏 Footer */
     footer {display: none !important;}
     header {display: none !important;}
@@ -205,7 +222,6 @@ with st.expander("🛠️ 任務工具箱"):
     
     st.markdown("---")
     data_link = "https://docs.google.com/forms/" 
-    # 使用 container_width 讓按鈕填滿，但保持預設樣式
     st.link_button("📝 開啟數據紀錄表 (Google Form)", data_link, use_container_width=True)
 
 # [日期選擇器]
@@ -218,6 +234,7 @@ for idx, day in enumerate(days_list):
         default_idx = idx
         break
 
+# 下拉選單
 selected_day = st.selectbox("📅 請選擇日期：", days_list, index=default_idx)
 events = schedule_data[selected_day]
 
