@@ -5,12 +5,11 @@ from datetime import datetime
 # --- 1. 頁面基礎設定 ---
 st.set_page_config(page_title="EO Swim Tour", page_icon="🏊", layout="centered")
 
-# --- 2. 核彈級 CSS 強制覆蓋 (針對截圖問題修復) ---
+# --- 2. 絕對色彩鎖定 CSS (針對深色模式強制修正) ---
 st.markdown("""
     <style>
     /* =========================================
        1. 全域強制亮色 (Force Light Theme)
-       這會告訴瀏覽器：此網頁不支援深色模式
        ========================================= */
     :root {
         color-scheme: light !important;
@@ -26,7 +25,7 @@ st.markdown("""
     }
 
     /* =========================================
-       2. 下拉選單 (Selectbox) 深度修復 (圖2問題)
+       2. 下拉選單 (Selectbox) 深度修復
        ========================================= */
     /* 輸入框本體 */
     div[data-baseweb="select"] > div {
@@ -35,21 +34,21 @@ st.markdown("""
         color: #000000 !important;
     }
     
-    /* 關鍵：下拉後的清單容器 (Popover) */
+    /* 下拉後的清單容器 (Popover) */
     div[data-baseweb="popover"] {
         background-color: #ffffff !important;
         border: 1px solid #ccc !important;
     }
     
-    /* 關鍵：清單內的選項列表 */
+    /* 清單內的選項列表 */
     div[data-baseweb="menu"], ul {
         background-color: #ffffff !important;
     }
     
-    /* 關鍵：單一選項 (Option) */
+    /* 單一選項 (Option) */
     li[role="option"] {
-        background-color: #ffffff !important; /* 強制白底 */
-        color: #000000 !important;            /* 強制黑字 */
+        background-color: #ffffff !important;
+        color: #000000 !important;
         border-bottom: 1px solid #f0f0f0 !important;
     }
     
@@ -58,18 +57,15 @@ st.markdown("""
         color: #000000 !important;
     }
 
-    /* 滑鼠滑過 / 手指按下的反白效果 */
+    /* 滑鼠滑過效果 */
     li[role="option"]:hover, li[role="option"][aria-selected="true"] {
-        background-color: #e6f7ff !important; /* 淺藍色高亮 */
+        background-color: #e6f7ff !important;
         color: #000000 !important;
     }
 
     /* =========================================
-       3. 按鈕 (Link Button) 深度修復 (圖1問題)
-       包含：導航、找停車、找美食、找咖啡
+       3. 按鈕 (Link Button) 深度修復
        ========================================= */
-    
-    /* 針對所有 stLinkButton 內的 <a> 標籤 */
     div[data-testid="stLinkButton"] a {
         background-color: #ffffff !important;   /* 絕對白底 */
         color: #000000 !important;              /* 絕對黑字 */
@@ -77,45 +73,22 @@ st.markdown("""
         border-radius: 8px !important;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
         font-weight: 800 !important;
-        
-        /* 確保 Safari/iPhone 不會反轉顏色 */
         -webkit-text-fill-color: #000000 !important; 
     }
 
-    /* 針對「欄位 (Column)」內的小按鈕特別加強權重 */
+    /* 針對「欄位 (Column)」內的小按鈕特別加強 */
     div[data-testid="column"] div[data-testid="stLinkButton"] a {
         background-color: #ffffff !important;
         color: #000000 !important;
-        border-color: #333333 !important; /* 小按鈕用深灰框，區分層級 */
+        border-color: #333333 !important;
     }
 
-    /* 按下效果 */
     div[data-testid="stLinkButton"] a:active {
         background-color: #ddd !important;
     }
 
     /* =========================================
-       4. 任務工具箱 (Expander)
-       ========================================= */
-    div[data-testid="stExpander"] {
-        background-color: #ffffff !important;
-        border: 1px solid #ccc !important;
-        color: #000000 !important;
-    }
-    div[data-testid="stExpanderDetails"] {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-    }
-    div[data-testid="stExpander"] summary {
-        color: #000000 !important; 
-    }
-    /* Checkbox 文字 */
-    div[data-testid="stCheckbox"] label span {
-        color: #000000 !important;
-    }
-
-    /* =========================================
-       5. 卡片樣式 (維持清晰)
+       4. 卡片樣式
        ========================================= */
     .event-card {
         background-color: #ffffff !important;
@@ -123,7 +96,7 @@ st.markdown("""
         border-radius: 12px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         margin-bottom: 15px;
-        border: 1px solid #bbb; /* 加深邊框 */
+        border: 1px solid #bbb;
     }
     .time-text { font-size: 1.4rem; font-weight: 900; color: #000 !important; margin-right: 8px;}
     .loc-text { font-size: 1.2rem; font-weight: 800; color: #0056b3 !important; margin-top: 5px;}
@@ -206,20 +179,9 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# [任務工具箱] (使用 Expander)
-with st.expander("🛠️ 任務工具箱 (Checklist & Data)"):
-    st.markdown("**離場前確認：**")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.checkbox("eo 感測器")
-        st.checkbox("三腳架")
-    with c2:
-        st.checkbox("個人錢包")
-        st.checkbox("延長線")
-    
-    st.markdown("---")
-    data_link = "https://docs.google.com/forms/" 
-    st.link_button("📝 開啟數據紀錄表", data_link, use_container_width=True)
+# [數據紀錄表按鈕 - 獨立移出]
+data_link = "https://docs.google.com/forms/" 
+st.link_button("📝 開啟數據紀錄表 (Google Form)", data_link, use_container_width=True)
 
 # [日期選擇器]
 st.write("") 
@@ -239,7 +201,6 @@ events = schedule_data[selected_day]
 if len(events) > 1:
     st.write("")
     full_route = get_full_route_url(events)
-    # 不使用 type='primary'，確保使用我們的 CSS
     st.link_button(
         f"🗺️ 啟動 Day {selected_day.split(' ')[2]} 全程導航", 
         full_route, 
@@ -268,7 +229,7 @@ for event in events:
     </div>
     """, unsafe_allow_html=True)
     
-    # 按鈕區 (使用 Streamlit 原生 Columns)
+    # 按鈕區
     col_main, col_sub1, col_sub2, col_sub3 = st.columns([3, 1, 1, 1])
     
     with col_main:
