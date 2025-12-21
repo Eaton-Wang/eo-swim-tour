@@ -5,102 +5,133 @@ from datetime import datetime
 # --- 1. 頁面基礎設定 ---
 st.set_page_config(page_title="EO Swim Tour", page_icon="🏊", layout="centered")
 
-# --- 2. 暴力高對比 CSS (針對按鈕與選單修正) ---
+# --- 2. 絕對色彩鎖定 CSS (修復下拉選單黑底問題) ---
 st.markdown("""
     <style>
     /* =========================================
-       1. 全域強制設定
+       1. 全域強制設定 (Root Overrides)
        ========================================= */
     :root {
-        --text-color: #000000 !important;
-        --background-color: #ffffff !important;
+        --primary-color: #0066cc;
+        --background-color: #ffffff;
+        --secondary-background-color: #f0f2f6;
+        --text-color: #000000;
+        --font: sans-serif;
     }
+    
+    /* 強制 App 背景為淺灰 */
     .stApp {
-        background-color: #f0f2f6 !important; /* 強制淺灰背景 */
+        background-color: #f2f4f8 !important;
     }
-    /* 強制所有文字為黑色 */
+    
+    /* 強制主要文字為黑色 */
     p, h1, h2, h3, div, span, label, li {
         color: #000000 !important;
     }
 
     /* =========================================
-       2. 任務工具箱 (Expander) 修正
+       2. 下拉選單 (Selectbox) 深度修復
+       這是針對您第二張截圖「全黑選單」的解法
        ========================================= */
-    /* 修正展開後的背景色變成黑色的問題 */
-    div[data-testid="stExpanderDetails"] {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        border: 1px solid #cccccc !important;
-    }
-    /* 強制展開區塊內的所有文字 (包含 Checkbox) */
-    div[data-testid="stExpanderDetails"] * {
-        color: #000000 !important;
-    }
-    /* 修正 Expander 標題 */
-    div[data-testid="stExpander"] summary {
-        color: #000000 !important;
-        background-color: #e0e0e0 !important; /* 給標題一個淺灰底色 */
-        border-radius: 5px;
-    }
-
-    /* =========================================
-       3. 按鈕 (Link Button) 暴力重繪
-       包含：導航前往、找美食、開啟數據表
-       ========================================= */
-    /* 針對所有連結按鈕 (Link Button) */
-    div[data-testid="stLinkButton"] > a {
-        background-color: #ffffff !important;   /* 強制白底 */
-        color: #000000 !important;              /* 強制黑字 */
-        border: 2px solid #0066cc !important;   /* 深藍邊框 */
-        font-weight: 900 !important;            /* 超粗體 */
-        text-decoration: none !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
-    }
     
-    /* 滑鼠滑過時的效果 (讓使用者知道可以點) */
-    div[data-testid="stLinkButton"] > a:hover {
-        background-color: #e6f0ff !important;
-        color: #000000 !important;
-    }
-    
-    /* 針對「主要按鈕」(全程導航) 特別給予不同顏色 */
-    /* 這裡透過 Python 的 type='primary' 產生區別，我們用 CSS 抓取 */
-    /* 注意：Streamlit 有時會改變 class，所以我們維持統一白底黑字最安全 */
-
-    /* =========================================
-       4. 下拉選單 (Selectbox) 修正
-       ========================================= */
+    /* 選單還沒點開時的框框 */
     div[data-baseweb="select"] > div {
         background-color: #ffffff !important;
-        border: 2px solid #333 !important;
+        border: 2px solid #000000 !important; /* 改成黑色邊框更明顯 */
         color: #000000 !important;
     }
-    div[data-testid="stSelectbox"] label {
-        color: #000000 !important;
-        font-weight: bold !important;
-    }
-    /* 選單內的文字強制黑色 */
+    
+    /* 選單內的文字 (選中後) */
     div[data-baseweb="select"] span {
         color: #000000 !important;
         -webkit-text-fill-color: #000000 !important;
+        font-weight: 900 !important;
+    }
+
+    /* !!! 關鍵修復：下拉出來的清單容器 !!! */
+    div[data-baseweb="popover"],
+    div[data-baseweb="menu"],
+    ul[role="listbox"] {
+        background-color: #ffffff !important; /* 強制白底 */
+    }
+
+    /* !!! 關鍵修復：清單裡的每一個選項 !!! */
+    li[role="option"] {
+        background-color: #ffffff !important; /* 強制白底 */
+        color: #000000 !important;            /* 強制黑字 */
+        border-bottom: 1px solid #eeeeee !important; /* 加個分隔線 */
+    }
+    
+    /* 滑鼠滑過選項時 */
+    li[role="option"]:hover, li[role="option"][aria-selected="true"] {
+        background-color: #e6f7ff !important; /* 淺藍底 */
+        color: #000000 !important;
+    }
+    
+    /* 選單內的小文字 (如描述) */
+    div[data-baseweb="menu"] div {
+        color: #000000 !important;
     }
 
     /* =========================================
-       5. 卡片樣式 (維持不變，確保清晰)
+       3. 按鈕 (Link Button) 深度修復
+       這是針對您第一張截圖「右側按鈕變黑」的解法
+       ========================================= */
+    
+    /* 強制所有連結按鈕 (包含導航、停車、美食...) 變成白底黑字 */
+    div[data-testid="stLinkButton"] > a {
+        background-color: #ffffff !important;   /* 絕對白底 */
+        color: #000000 !important;              /* 絕對黑字 */
+        border: 2px solid #0066cc !important;   /* 深藍邊框 */
+        font-weight: 800 !important;
+        text-decoration: none !important;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15) !important;
+        
+        /* 確保字體在任何瀏覽器都不會變色 */
+        -webkit-text-fill-color: #000000 !important; 
+    }
+
+    /* 滑鼠滑過按鈕 */
+    div[data-testid="stLinkButton"] > a:hover {
+        background-color: #f0f8ff !important;
+        border-color: #004d99 !important;
+    }
+    
+    /* 特別針對右側三個小按鈕的容器微調 (若需要) */
+    /* 這裡只要上面的規則生效，三個小按鈕也會變白 */
+
+    /* =========================================
+       4. 任務工具箱 (Expander)
+       ========================================= */
+    div[data-testid="stExpander"] {
+        background-color: #ffffff !important;
+        border-radius: 8px;
+    }
+    div[data-testid="stExpander"] summary {
+        color: #000000 !important;
+        font-weight: bold;
+    }
+    div[data-testid="stExpanderDetails"] {
+        background-color: #fafafa !important;
+        color: #000000 !important;
+    }
+
+    /* =========================================
+       5. 卡片設計 (保持不變，因為這部分顯示正常)
        ========================================= */
     .event-card {
         background-color: #ffffff !important;
-        padding: 15px;
-        border-radius: 10px;
-        border: 2px solid #bbbbbb;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         margin-bottom: 15px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border: 1px solid #ddd;
     }
-    .time-text { font-size: 1.4rem; font-weight: 900; color: #000 !important; margin-right: 10px;}
+    .time-text { font-size: 1.5rem; font-weight: 900; color: #000 !important; margin-right: 8px;}
     .loc-text { font-size: 1.2rem; font-weight: 800; color: #0056b3 !important; margin-top: 5px;}
-    .addr-text { font-size: 1rem; color: #333 !important; }
-    .tag { background: #ddd !important; color: #000 !important; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;}
-
+    .addr-text { font-size: 1rem; color: #333 !important; margin-bottom: 10px;}
+    .tag { background: #eee !important; color: #000 !important; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;}
+    
     /* 隱藏 Footer */
     footer {display: none !important;}
     header {display: none !important;}
@@ -204,6 +235,7 @@ for idx, day in enumerate(days_list):
         default_idx = idx
         break
 
+# 下拉選單
 selected_day = st.selectbox("📅 請選擇日期：", days_list, index=default_idx)
 events = schedule_data[selected_day]
 
