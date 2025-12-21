@@ -5,100 +5,95 @@ from datetime import datetime
 # --- 1. 頁面基礎設定 ---
 st.set_page_config(page_title="EO Swim Tour", page_icon="🏊", layout="centered")
 
-# --- 2. 絕對色彩鎖定 CSS (修復下拉選單黑底問題) ---
+# --- 2. 絕對色彩鎖定 CSS (含按鈕強制亮色修復) ---
 st.markdown("""
     <style>
     /* =========================================
-       1. 全域強制設定 (Root Overrides)
+       1. 全域強制設定
        ========================================= */
     :root {
-        --primary-color: #0066cc;
-        --background-color: #ffffff;
-        --secondary-background-color: #f0f2f6;
-        --text-color: #000000;
-        --font: sans-serif;
+        --text-color: #000000 !important;
+        --background-color: #ffffff !important;
     }
     
-    /* 強制 App 背景為淺灰 */
-    .stApp {
+    /* 強制告訴瀏覽器：這個網頁只支援亮色模式 (關鍵修復) */
+    html, body, [data-testid="stAppViewContainer"] {
+        color-scheme: light !important;
         background-color: #f2f4f8 !important;
     }
-    
-    /* 強制主要文字為黑色 */
+
+    /* 強制所有文字為黑色 */
     p, h1, h2, h3, div, span, label, li {
         color: #000000 !important;
     }
 
     /* =========================================
-       2. 下拉選單 (Selectbox) 深度修復
-       這是針對您第二張截圖「全黑選單」的解法
+       2. 按鈕 (Link Button) 終極修復
+       解決：按鈕被強制變黑、看不到圖示
        ========================================= */
-    
-    /* 選單還沒點開時的框框 */
-    div[data-baseweb="select"] > div {
-        background-color: #ffffff !important;
-        border: 2px solid #000000 !important; /* 改成黑色邊框更明顯 */
+    div[data-testid="stLinkButton"] {
+        /* 強制按鈕區域只能是亮色 */
+        color-scheme: light !important; 
+    }
+
+    div[data-testid="stLinkButton"] > a {
+        background-color: #ffffff !important;   /* 絕對白底 */
+        color: #000000 !important;              /* 絕對黑字 */
+        border: 2px solid #0066cc !important;   /* 深藍邊框 (讓按鈕有輪廓) */
+        border-radius: 8px !important;
+        font-weight: 900 !important;
+        text-decoration: none !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important; /* 加上陰影 */
+        
+        /* 確保 Safari 不會偷偷改字體顏色 */
+        -webkit-text-fill-color: #000000 !important; 
+    }
+
+    /* 滑鼠滑過 / 手指按下的狀態 */
+    div[data-testid="stLinkButton"] > a:hover, div[data-testid="stLinkButton"] > a:active {
+        background-color: #e6f7ff !important;   /* 淺藍底 */
         color: #000000 !important;
+        border-color: #004499 !important;
     }
     
-    /* 選單內的文字 (選中後) */
+    /* 針對右側三個小按鈕 (🅿️, 🍱, ☕) 的特別優化 
+       我們用 CSS 選擇器 "a" 來統一處理，所以上面的設定會同時生效
+       這裡確保它們有足夠的寬度顯示圖示 */
+    div[data-testid="column"] div[data-testid="stLinkButton"] a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 45px; /* 確保按鈕夠高，好按 */
+    }
+
+    /* =========================================
+       3. 下拉選單 (Selectbox) (維持您說已解決的設定)
+       ========================================= */
+    div[data-baseweb="select"] > div {
+        background-color: #ffffff !important;
+        border: 2px solid #000000 !important;
+        color: #000000 !important;
+    }
     div[data-baseweb="select"] span {
         color: #000000 !important;
         -webkit-text-fill-color: #000000 !important;
         font-weight: 900 !important;
     }
-
-    /* !!! 關鍵修復：下拉出來的清單容器 !!! */
-    div[data-baseweb="popover"],
-    div[data-baseweb="menu"],
-    ul[role="listbox"] {
-        background-color: #ffffff !important; /* 強制白底 */
+    div[data-baseweb="popover"], div[data-baseweb="menu"], ul[role="listbox"] {
+        background-color: #ffffff !important;
     }
-
-    /* !!! 關鍵修復：清單裡的每一個選項 !!! */
     li[role="option"] {
-        background-color: #ffffff !important; /* 強制白底 */
-        color: #000000 !important;            /* 強制黑字 */
-        border-bottom: 1px solid #eeeeee !important; /* 加個分隔線 */
-    }
-    
-    /* 滑鼠滑過選項時 */
-    li[role="option"]:hover, li[role="option"][aria-selected="true"] {
-        background-color: #e6f7ff !important; /* 淺藍底 */
+        background-color: #ffffff !important;
         color: #000000 !important;
+        border-bottom: 1px solid #eee !important;
     }
-    
-    /* 選單內的小文字 (如描述) */
-    div[data-baseweb="menu"] div {
+    li[role="option"]:hover {
+        background-color: #e6f7ff !important;
+    }
+    div[data-testid="stSelectbox"] label {
         color: #000000 !important;
-    }
-
-    /* =========================================
-       3. 按鈕 (Link Button) 深度修復
-       這是針對您第一張截圖「右側按鈕變黑」的解法
-       ========================================= */
-    
-    /* 強制所有連結按鈕 (包含導航、停車、美食...) 變成白底黑字 */
-    div[data-testid="stLinkButton"] > a {
-        background-color: #ffffff !important;   /* 絕對白底 */
-        color: #000000 !important;              /* 絕對黑字 */
-        border: 2px solid #0066cc !important;   /* 深藍邊框 */
         font-weight: 800 !important;
-        text-decoration: none !important;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.15) !important;
-        
-        /* 確保字體在任何瀏覽器都不會變色 */
-        -webkit-text-fill-color: #000000 !important; 
     }
-
-    /* 滑鼠滑過按鈕 */
-    div[data-testid="stLinkButton"] > a:hover {
-        background-color: #f0f8ff !important;
-        border-color: #004d99 !important;
-    }
-    
-    /* 特別針對右側三個小按鈕的容器微調 (若需要) */
-    /* 這裡只要上面的規則生效，三個小按鈕也會變白 */
 
     /* =========================================
        4. 任務工具箱 (Expander)
@@ -106,32 +101,33 @@ st.markdown("""
     div[data-testid="stExpander"] {
         background-color: #ffffff !important;
         border-radius: 8px;
+        border: 1px solid #ccc !important;
     }
     div[data-testid="stExpander"] summary {
         color: #000000 !important;
         font-weight: bold;
     }
     div[data-testid="stExpanderDetails"] {
-        background-color: #fafafa !important;
+        background-color: #ffffff !important;
         color: #000000 !important;
     }
 
     /* =========================================
-       5. 卡片設計 (保持不變，因為這部分顯示正常)
+       5. 卡片樣式
        ========================================= */
     .event-card {
         background-color: #ffffff !important;
         padding: 16px;
         border-radius: 12px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         margin-bottom: 15px;
-        border: 1px solid #ddd;
+        border: 1px solid #999; /* 加深邊框 */
     }
     .time-text { font-size: 1.5rem; font-weight: 900; color: #000 !important; margin-right: 8px;}
     .loc-text { font-size: 1.2rem; font-weight: 800; color: #0056b3 !important; margin-top: 5px;}
     .addr-text { font-size: 1rem; color: #333 !important; margin-bottom: 10px;}
     .tag { background: #eee !important; color: #000 !important; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;}
-    
+
     /* 隱藏 Footer */
     footer {display: none !important;}
     header {display: none !important;}
